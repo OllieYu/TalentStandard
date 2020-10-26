@@ -18,6 +18,7 @@ import { BodyWrapper, loaderData } from '../Layout/BodyWrapper.jsx';
 import { LoggedInNavigation } from '../Layout/LoggedInNavigation.jsx';
 import TalentStatus from './TalentStatus.jsx';
 
+
 export default class AccountProfile extends React.Component {
     constructor(props) {
         super(props)
