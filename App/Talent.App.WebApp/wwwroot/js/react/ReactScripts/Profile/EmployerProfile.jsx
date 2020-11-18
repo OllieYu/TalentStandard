@@ -57,6 +57,7 @@ export default class EmployeeProfile extends React.Component {
                 'Authorization': 'Bearer ' + cookies,
                 'Content-Type': 'application/json'
             },
+            crossDomain: true,
             type: "GET",
             contentType: "application/json",
             dataType: "json",

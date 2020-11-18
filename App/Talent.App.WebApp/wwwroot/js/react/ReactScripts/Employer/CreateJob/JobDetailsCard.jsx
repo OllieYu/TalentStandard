@@ -6,7 +6,7 @@ import { Dropdown } from 'semantic-ui-react'
 import { countryOptions } from '../common.js'
 import { JobCategories } from './JobCategories.jsx';
 import { Salary } from './Salary.jsx';
-import { Location } from './Location.jsx';
+import { Country, City } from './Location.jsx';
 
 export class JobDetailsCard extends React.Component {
     constructor(props) {
@@ -177,7 +177,9 @@ export class JobDetailsCard extends React.Component {
                                 <div className="content">
                                     <div className="summary">
                                         *Location:
-                                        <Location location={jobDetails.location} handleChange={this.handleChange}/>
+                                        <Country location={jobDetails.location} handleChange={this.handleChange} countryWidth={8} source = 'employer'/>
+                                        <City location={jobDetails.location} handleChange={this.handleChange} CityWidth={8} source = 'employer'/>
+                                        {/* <Location location={jobDetails.location} handleChange={this.handleChange}/> */}
                                     </div>
                                 </div>
                             </div>

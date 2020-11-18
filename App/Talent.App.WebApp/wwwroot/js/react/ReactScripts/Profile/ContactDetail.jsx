@@ -1,7 +1,8 @@
 ﻿import React, { Component } from "react";
 import Cookies from 'js-cookie';
 import { ChildSingleInput } from '../Form/SingleInput.jsx';
-import { Location } from '../Employer/CreateJob/Location.jsx';
+import { Country, City } from '../Employer/CreateJob/Location.jsx';
+import { Grid } from 'semantic-ui-react';
 export class IndividualDetailSection extends Component {
     constructor(props) {
         super(props)
@@ -51,8 +52,6 @@ export class IndividualDetailSection extends Component {
     }
 
     saveContact() {
-        console.log(this.props.componentId)
-        console.log(this.state.newContact)
         const data = Object.assign({}, this.state.newContact)
         this.props.controlFunc(this.props.componentId, data)
         this.closeEdit()
@@ -64,14 +63,19 @@ export class IndividualDetailSection extends Component {
         )
     }
 
+
     renderEdit() {
+        let firstName = this.state.newContact.firstName ? this.state.newContact.firstName : ""
+        let lastName = this.state.newContact.lastName ? this.state.newContact.lastName: ""
+        let email = this.state.newContact.email ? this.state.newContact.email : ""
+        let phone = this.state.newContact.phone ? this.state.newContact.phone : ""
         return (
             <div className='ui sixteen wide column'>
                 <ChildSingleInput
                     inputType="text"
                     label="First Name"
                     name="firstName"
-                    value={this.state.newContact.firstName}
+                    value={firstName }
                     controlFunc={this.handleChange}
                     maxLength={80}
                     placeholder="Enter your first name"
@@ -81,7 +85,7 @@ export class IndividualDetailSection extends Component {
                     inputType="text"
                     label="Last Name"
                     name="lastName"
-                    value={this.state.newContact.lastName}
+                    value={lastName}
                     controlFunc={this.handleChange}
                     maxLength={80}
                     placeholder="Enter your last name"
@@ -91,7 +95,7 @@ export class IndividualDetailSection extends Component {
                     inputType="text"
                     label="Email address"
                     name="email"
-                    value={this.state.newContact.email}
+                    value={email}
                     controlFunc={this.handleChange}
                     maxLength={80}
                     placeholder="Enter an email"
@@ -102,7 +106,7 @@ export class IndividualDetailSection extends Component {
                     inputType="text"
                     label="Phone number"
                     name="phone"
-                    value={this.state.newContact.phone}
+                    value={phone}
                     controlFunc={this.handleChange}
                     maxLength={12}
                     placeholder="Enter a phone number"
@@ -120,7 +124,6 @@ export class IndividualDetailSection extends Component {
         let fullName = this.props.details ? `${this.props.details.firstName} ${this.props.details.lastName}` : ""
         let email = this.props.details ? this.props.details.email : ""
         let phone = this.props.details ? this.props.details.phone : ""
-
         return (
             <div className='row'>
                 <div className="ui sixteen wide column">
@@ -182,8 +185,9 @@ export class CompanyDetailSection extends Component {
         this.setState({
             newContact: data
         })
+        
     }
-
+    
     saveContact() {
         const data = Object.assign({}, this.state.newContact)
         this.props.controlFunc(this.props.componentId, data)
@@ -201,7 +205,6 @@ export class CompanyDetailSection extends Component {
         if (this.state.newContact && this.state.newContact.location) {
             location = this.state.newContact.location
         }
-
         return (
             <div className='ui sixteen wide column'>
                 <ChildSingleInput
@@ -235,8 +238,8 @@ export class CompanyDetailSection extends Component {
                     placeholder="Enter a phone number"
                     errorMessage="Please enter a valid phone number"
                 />
-                Location:
-                <Location location={location} handleChange={this.handleChange} />
+                <Country location={location} handleChange={this.handleChange} countryWidth={8} source = 'employer'/>
+                <City location={location} handleChange={this.handleChange} CityWidth={8} source = 'employer'/>
                 <button type="button" className="ui teal button" onClick={this.saveContact}>Save</button>
                 <button type="button" className="ui button" onClick={this.closeEdit}>Cancel</button>
             </div>
