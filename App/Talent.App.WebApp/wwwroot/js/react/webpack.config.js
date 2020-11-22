@@ -29,7 +29,8 @@ module.exports = {
                     'style-loader',
                     'css-loader?modules'
                 ]
-            }
+            },
+            {test:/.(png|jpg|gif|svg)$/, use:['url-loader?limit=8192&name=./[name].[ext]']}
         ]
     }
 }

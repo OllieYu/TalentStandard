@@ -342,44 +342,44 @@ namespace Talent.Services.Profile.Domain.Services
 
         public async Task<bool> UpdateTalentPhoto(string talentId, IFormFile file)
         {
-            if(file == null)
+            try
             {
-                return false;
-            }
-            var fileExtension = Path.GetExtension(file.FileName);
-            List<string> acceptedExtensions = new List<string> { ".jpg", ".png", ".gif", ".jpeg" };
+                User profile = await _userRepository.GetByIdAsync(talentId);
 
-            if (fileExtension != null && !acceptedExtensions.Contains(fileExtension.ToLower()))
-            {
-                return false;
-            }
-
-            var profile = (await _userRepository.Get(x => x.Id == talentId)).SingleOrDefault();
-
-            if (profile == null)
-            {
-                return false;
-            }
-
-            var newFileName = await _fileService.SaveFile(file, FileType.ProfilePhoto);
-
-            if (!string.IsNullOrWhiteSpace(newFileName))
-            {
-                var oldFileName = profile.ProfilePhoto;
-
-                if (!string.IsNullOrWhiteSpace(oldFileName))
+                if (profile == null)
                 {
-                    await _fileService.DeleteFile(oldFileName, FileType.ProfilePhoto);
+                    return false;
                 }
 
-                profile.ProfilePhoto = newFileName;
-                profile.ProfilePhotoUrl = await _fileService.GetFileURL(newFileName, FileType.ProfilePhoto);
+                DateTime updatedDate = DateTime.Now;
+                string name = talentId + updatedDate.Ticks.ToString();
+                file = new Microsoft.AspNetCore.Http.Internal.FormFile(file.OpenReadStream(), 0, file.Length, name, name);
 
-                await _userRepository.Update(profile);
-                return true;
+                string newFileUrl = await _fileService.SaveFile(file, FileType.ProfilePhoto);
+
+                if (!String.IsNullOrWhiteSpace(newFileUrl))
+                {
+                    if (!String.IsNullOrWhiteSpace(profile.ProfilePhoto))
+                    {
+                        await _fileService.DeleteFile(profile.ProfilePhoto, FileType.ProfilePhoto);
+                    }
+
+                    profile.ProfilePhoto = file.Name;
+                    profile.ProfilePhotoUrl = newFileUrl;
+                    profile.UpdatedOn = updatedDate;
+
+                    await _userRepository.Update(profile);
+                    return true;
+                }
+
+                return false;
             }
+            catch
+            {
+                return false;
+            }
+        
 
-            return false;
         }
 
         public async Task<bool> AddTalentVideo(string talentId, IFormFile file)

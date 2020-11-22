@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Talent.Common": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}

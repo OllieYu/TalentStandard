@@ -21,47 +21,39 @@ namespace Talent.Common.Services
             IAwsService awsService)
         {
             _environment = environment;
-            _tempFolder = "\\images\\";
+            _tempFolder = "images\\";
             _awsService = awsService;
         }
 
         public async Task<string> GetFileURL(string id, FileType type)
         {
-            var imagePath = Path.Combine(_environment.ContentRootPath, _tempFolder, id);
-            return imagePath;
+            return await _awsService.GetStaticUrl(id, "ollie-talent");
         }
 
         public async Task<string> SaveFile(IFormFile file, FileType type)
         {
-            var myUniqueFileName = "";
-            string pathWeb = "";
-            pathWeb = _environment.ContentRootPath;
-
-            if (file != null && type == FileType.ProfilePhoto && pathWeb != "")
+            switch (type)
             {
-                string pathValue = pathWeb + _tempFolder;
-                myUniqueFileName = $@"{DateTime.Now.Ticks}_" + file.FileName;
-                var path = pathValue + myUniqueFileName;
-                using (var fileStream = new FileStream(path, FileMode.Create))
-                {
-                    await file.CopyToAsync(fileStream);
-                }
-                Console.WriteLine(path);
+                case FileType.ProfilePhoto:
+                case FileType.UserCV:
+                case FileType.UserVideo:
+                    return await SaveFileGeneral(file, "ollie-talent", null, true);
+                default:
+                    return null;
             }
-            return myUniqueFileName;
         }
 
         public async Task<bool> DeleteFile(string id, FileType type)
         {
-            var imagePath = Path.Combine(_environment.ContentRootPath, _tempFolder, id);
-            FileInfo fi = new FileInfo(imagePath);
-            if (fi != null)
+            switch (type)
             {
-                System.IO.File.Delete(imagePath);
-                fi.Delete();
-                return true;
+                case FileType.ProfilePhoto:
+                case FileType.UserCV:
+                case FileType.UserVideo:
+                    return await DeleteFileGeneral(id, "ollie-talent");
+                default:
+                    return false;
             }
-            return false;
         }
 
 
@@ -69,14 +61,16 @@ namespace Talent.Common.Services
 
         private async Task<string> SaveFileGeneral(IFormFile file, string bucket, string folder, bool isPublic)
         {
-            //Your code here;
-            throw new NotImplementedException();
+            if (await _awsService.PutFileToS3(file.Name, file.OpenReadStream(), bucket, isPublic))
+            {
+                return await _awsService.GetStaticUrl(file.Name, bucket);
+            }
+            return null;
         }
         
         private async Task<bool> DeleteFileGeneral(string id, string bucket)
         {
-            //Your code here;
-            throw new NotImplementedException();
+            return await _awsService.RemoveFileFromS3(id, bucket);
         }
         #endregion
     }

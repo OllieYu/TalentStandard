@@ -1,97 +1,104 @@
 ﻿/* Photo upload section */
 import React, { Component } from 'react';
 import Cookies from 'js-cookie';
-import { Button, Icon, Image } from 'semantic-ui-react';
-
 
 export default class PhotoUpload extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            newFile: null,
-            newFileUrl: null,
-            hasData: false
-        }
-       this.showPreview = this.showPreview.bind(this)
-       this.loadData = this.loadData.bind(this)
+            uploaded: true,
+            uploading: false
+        };
+
+        this.form = React.createRef();
+        this.photoUpload = React.createRef();
+
+        this.handleChange = this.handleChange.bind(this);
+        this.openUpload = this.openUpload.bind(this);
+        this.upload = this.upload.bind(this);
     };
 
+    handleChange() {
+        if (this.photoUpload.current.files.length > 0) {
+            const imageUrl = URL.createObjectURL(this.photoUpload.current.files[0]);
 
-    showPreview(e){
-        let acceptedExt = ["image/png", "image/jpg", "image/jpeg", "image/gif"];
-        let selectedFile = e.target.files[0];
-        console.log(e.target.files[0]);
-        if (this.state.newFile) {
-            URL.revokeObjectURL(newFile);
-        }
-        if (acceptedExt.includes(selectedFile.type)) {
             this.setState({
-                uploadButton: "",
-                newFileUrl: URL.createObjectURL(e.target.files[0]),
-                newFile: e.target.files[0],
-                hasData:true
-            })
+                uploaded: false
+            });
+
+            this.props.updateProfileData({
+                profilePhotoUrl: imageUrl
+            });
         }
-        // if(e.target.files && e.target.files[0]){
-        //     let imageFile = e.target.files[0]
-        //     const reader = new FileReader()
-        //     reader.onload = x =>{
-        //         this.setState({
-        //             imageFile: imageFile,
-        //             imageSrc: x.target.result,
-        //             hasData: true
-        //         })
-        //     }
-        //     reader.readAsDataURL(imageFile)
-        // }
-        // console.log(e.target.files)
     }
 
-    loadData() {
-        var formDate = new FormData()
-        let file = this.state.newFile
-        formDate.append("photo", file)
+    openUpload() {
+        this.photoUpload.current.click();
+    }
 
+    upload() {
         var cookies = Cookies.get('talentAuthToken');
+        const data = new FormData();
+        data.append('photo', this.photoUpload.current.files[0]);
+
         $.ajax({
             url: this.props.savePhotoUrl,
             headers: {
-                'Authorization': 'Bearer ' + cookies,
-                'content-type': 'multipart/form-data'
+                'Authorization': 'Bearer ' + cookies
             },
-            contentType: false,
-            cache: false,
-            processData: false,
-            data: formDate,
             type: "POST",
+            data: data,
+            processData: false,
+            contentType: false,
             success: function (res) {
-                if (res.success == true) {
-                    TalentUtil.notification.show("Profile updated sucessfully", "success", null, null)
+                if (res.success === true) {
+                    this.setState({
+                        uploaded: true,
+                        uploading: false
+                    });
+
+                    TalentUtil.notification.show("Updated profile photo successfully", "success", null, null);
                 } else {
-                   
-                    TalentUtil.notification.show("Profile did not update successfully", "error", null, null)
+                    this.setState({
+                        uploading: false
+                    });
+
+                    TalentUtil.notification.show("Couldn't upload profile photo", "error", null, null);
                 }
             }.bind(this),
-            error: function(data){
-                console.log(data)
+            error: function (res, a, b) {
+                this.setState({
+                    uploading: false
+                });
             }
-        })
+        });
+
+        this.setState({
+            uploading: true
+        });
     }
 
     render() {
-        return(
-            <div>
+        const uploadButtonClasses = this.state.uploading ? 'ui loading teal button' : 'ui teal button';
+
+        return (
             <div className='ui sixteen wide column'>
-                <input type="file" id="file" style = {{display:'none'}} onChange={this.showPreview}/>
-                <label htmlFor="file">{this.state.hasData ?
-                <Image style={{objectFit:'cover', width:'8rem', height:'8rem'}} src={this.state.newFileUrl} size='small' circular/> 
-                : <Icon size='huge' circular name='camera retro'/>}</label>
+                <div className='photo-upload field' onClick={this.openUpload}>
+                    {this.props.imageId ? 
+                        <img className='ui circular image' src={this.props.imageId} />
+                        :
+                        <i className='ui circular icon camera retro' />
+                    }
+                    <input type='file' style={{ display: 'none' }} accept='image/*' ref={this.photoUpload} onChange={this.handleChange} />
+                </div>
+                {!this.state.uploaded &&
+                    <button type='button' className={uploadButtonClasses} disabled={this.state.uploading} onClick={this.upload}>
+                        <i className='icon upload' /> Upload
+                    </button>
+                }
             </div>
-            <br/>
-            {/* <Image src={require('../../../../../../../Talent.Services.Profile/images/637412432676321060_1.jpg')}/> */}
-            <Button secondary type='button' onClick={this.loadData}><Icon name='upload'/>Upload</Button>
-            </div>
-        )
+        );
+        
     }
 }

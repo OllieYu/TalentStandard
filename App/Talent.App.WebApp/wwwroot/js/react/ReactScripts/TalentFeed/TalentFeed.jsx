@@ -22,11 +22,11 @@ export default class TalentFeed extends React.Component {
             watchlist: [],
             loaderData: loader,
             loadingFeedData: false,
-            companyDetails: null
+            companyDetails: {name: '', phone: '', email: '', location: {country: '', city: ''}}
         }
 
         this.init = this.init.bind(this);
-
+        this.loadData = this.loadData.bind(this);
     };
 
     init() {
@@ -37,19 +37,45 @@ export default class TalentFeed extends React.Component {
 
     componentDidMount() {
         //window.addEventListener('scroll', this.handleScroll);
+        this.loadData()
         this.init()
     };
 
    
+    loadData() {
+        var cookies = Cookies.get('talentAuthToken');
+        $.ajax({
+            url: 'http://localhost:60290/profile/profile/getEmployerProfile',
+            headers: {
+                'Authorization': 'Bearer ' + cookies,
+                'Content-Type': 'application/json'
+            },
+            crossDomain: true,
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (res) {
+                this.setState({
+                    companyDetails: res.employer.companyContact
+                })
+            }.bind(this),
+            error: function (res) {
+                console.log(res.status)
+            }
+        }) 
+    }
+
     render() {
 
         return (
             <BodyWrapper reload={this.init} loaderData={this.state.loaderData}>
-                <div className="ui container" style={{minHeight:'350px'}}>
+                <div className="ui container" style={{minHeight:'40rem'}}>
                 <br/>
                 <Grid>
                     <Grid.Column width={4}>
-                    <CompanyProfile /> 
+                    <CompanyProfile
+                    details = {this.state.companyDetails}
+                    /> 
                     </Grid.Column>
                     <Grid.Column width={8}>
                     <TalentCard />

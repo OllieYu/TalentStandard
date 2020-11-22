@@ -41,7 +41,7 @@ export default class AccountProfile extends React.Component {
                     github: ""
                 },
                 jobSeekingStatus: {
-                    status: "",
+                    status: '',
                     availableDate: null
                 }
             },

@@ -237,13 +237,12 @@ namespace Talent.Services.Profile.Controllers
             //Please do logic for no image available - maybe placeholder would be fine
             return Json(new { profilePath = profileUrl });
         }
-
         [HttpPost("updateProfilePhoto")]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "talent")]
-        public async Task<ActionResult> UpdateProfilePhoto([FromForm]IFormFile photo)
+        public async Task<ActionResult> UpdateProfilePhoto()
         {
-
-                if (ModelState.IsValid)
+            IFormFile photo = Request.Form.Files.GetFile("photo");
+            if (photo.ContentType.StartsWith("image/"))
                 {
                     if (await _profileService.UpdateTalentPhoto(_userAppContext.CurrentUserId, photo))
                     {
